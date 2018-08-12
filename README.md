@@ -9,10 +9,16 @@ requirements.txt - pip3 install -r requirements.txt - will install the necesary 
 
 # Install Instructions
 1. Clone Project
-2. Modify Docker file to include ssh keys and remote puppet repo where mounts.yml is located
-3. Run `docker build -t nfs_api:v1 .`
-4. Run `docker run -p 80:50000 nfs_api:v1`
-5. Interact with the api on your servers ip address on port 80.
+2. Run `docker build -t nfs_api:v1 .`
+3. Run 
+```
+docker run 
+-e REPO_URI=<url of git repo (ex. github.com)> 
+-e REPO_SSH_URI=<full ssh git (ex. git@github.com:danquack/NFS-API.git)> 
+-v /path-to-ssh-on-host:/root/.ssh 
+nfs_api:v1
+```
+4. Interact with the api on your servers ip address on port 80.
 
 # Context
 ### API
