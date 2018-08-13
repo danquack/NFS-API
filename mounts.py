@@ -9,18 +9,18 @@ class ExistsException(Exception):
     pass
 
 class Mounts:
-    nfs_repo_files = '/config/payx_nfs_mounts/files/'
+    nfs_repo_files = '/config/nfs_mounts/files/'
     def __init__(self):
         self.git = git.cmd.Git(self.nfs_repo_files)
         self.git.pull()
-        file_path = join(self.nfs_repo_files, 'test.yml')
+        file_path = join(self.nfs_repo_files, 'mounts.yml')
         with open(file_path) as yaml_file:
             self.nfs_info = yaml.safe_load(yaml_file.read())
 
     def commit(self, hostname, option):
         logging.debug(f"successfully {option} for {hostname}")
         self.update_current()
-        file_path = join(self.nfs_repo_files, 'test.yml')
+        file_path = join(self.nfs_repo_files, 'mounts.yml')
         self.git.add(file_path)
         try:
             self.git.commit('-m', f"'updated - {option} for {hostname}'")

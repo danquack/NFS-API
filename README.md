@@ -9,13 +9,14 @@ requirements.txt - pip3 install -r requirements.txt - will install the necesary 
 
 # Install Instructions
 1. Clone Project
+2. Modify git user profile configuration in dockerfile
 2. Run `docker build -t nfs_api:v1 .`
-3. Run 
+3. Run
 ```
-docker run 
--e REPO_URI=<url of git repo (ex. github.com)> 
--e REPO_SSH_URI=<full ssh git (ex. git@github.com:danquack/NFS-API.git)> 
--v /path-to-ssh-on-host:/root/.ssh 
+docker run \
+-e REPO_URI=<url of git repo (ex. github.com)> \
+-e REPO_SSH_URI=<full ssh git (ex. git@github.com:someuser/NFS-MOUNTS.git)> \
+-v /path/to/ssh/on/host:/root/.ssh \
 nfs_api:v1
 ```
 4. Interact with the api on your servers ip address on port 80.
@@ -76,7 +77,7 @@ nfs_api:v1
 </table>
 
 ### YAML File:
-The strucute of the yaml defines an array of mount objects, that live on a host/hostgroup.
+The structure of the yaml defines an array of mount objects, located in the external REPO_SSH_URI (NFS-Mounts under a files directory), is as follows
 ```
 Hosts:
    Hostname.company.com:
