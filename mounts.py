@@ -19,7 +19,7 @@ class Mounts:
             self.nfs_info = yaml.safe_load(yaml_file.read())
 
     def commit(self, hostname, option):
-        self.app.logger.debug(f"successfully {option} for {hostname}")
+        self.app.logger.info(f"successfully {option} for {hostname}")
         self.update_current()
         file_path = join(self.nfs_repo_files, 'mounts.yml')
         self.git.add(file_path)
@@ -54,7 +54,7 @@ class Mounts:
             host_type = 'hosts' if host else 'hostgroups'
             name = host if host else hostgroup
             if name.lower() not in self.nfs_info[host_type].keys():
-                self.app.logger.debug(f"{name}: has no mounts...appnding")
+                self.app.logger.info(f"{name}: has no mounts...appnding")
                 self.nfs_info[host_type].update( {name: [] })
 
             mount = {
@@ -66,7 +66,7 @@ class Mounts:
                     'group': group
             }
             if not self.check_exists(host_type, name, mount):
-                self.app.logger.debug(f"{name}: adding {mount}")
+                self.app.logger.info(f"{name}: adding {mount}")
                 self.nfs_info[host_type][name].append(mount)
                 self.commit(name, 'add')
                 return self.nfs_info[host_type][name]
@@ -83,7 +83,7 @@ class Mounts:
             for idx, val in enumerate(self.nfs_info[host_type][name]):
                 if uuid == val['uuid']:
                     self.nfs_info[host_type][name][idx].update(replacement_dict)
-                    self.app.logger.debug(f"{name}: updating {uuid}")
+                    self.app.logger.info(f"{name}: updating {uuid}")
                     changed = True
             if not changed:
                 raise IndexError('no index matching that uuid found')

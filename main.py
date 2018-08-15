@@ -1,22 +1,30 @@
 
+import logging
 from json import dumps, loads
 from flask import Flask, request, Response
-from flask_restful import Resource, Api
+from flask_restful import Resource
 
 from mounts import Mounts, ExistsException
 from os import environ
 
 app = Flask(__name__)
-api = Api(app)
+
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
 
 def error(message, code=400):
+    app.logger.info(f"{code}: {request.method} - {request.url_rule}")
     body = {'message': str(message)}
     return Response(dumps(body), status=code, mimetype='application/json')
 
 def ok(body):
+    app.logger.info(f"200: {request.method} - {request.url_rule}")
     return Response(dumps(body), status=200, mimetype='application/json')
 
 def not_found():
+    app.logger.info(f"404: {request.method} - {request.url_rule}")
     return Response('', status=404, mimetype='application/json')
 
 @app.route('/', methods = ['GET'])
@@ -141,4 +149,5 @@ def host_mount_index(host_type, name, uuid):
             return error(e)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)
+

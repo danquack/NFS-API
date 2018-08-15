@@ -15,7 +15,6 @@ requirements.txt - pip3 install -r requirements.txt - will install the necesary 
 ```
 docker run \
 -e REPO_SSH_URI=<full ssh git (ex. git@github.com:someuser/NFS-MOUNTS.git)> \
--e GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" \
 -v /path/to/ssh/on/host:/root/.ssh \
 -p 80:80
 nfs_api:latest

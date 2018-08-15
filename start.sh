@@ -1,3 +1,3 @@
 #!/bin/bash
 git clone $REPO_SSH_URI /config/nfs_mounts
-gunicorn -w 4 main:app -b 0.0.0.0:80
+gunicorn --workers 4 --bind 0.0.0.0:80 --log-level=info main:app
