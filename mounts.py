@@ -1,7 +1,7 @@
 import logging
 import yaml
 import uuid
-from os.path import dirname, join
+from os.path import join
 import git
 
 
@@ -72,7 +72,7 @@ class Mounts:
                 return self.nfs_info[host_type][name]
             else:
                 raise ExistsException('mount point already exists')
-    def update_nas_share(self, uuid, replacement_dict, host=None, hostgroup=None):
+    def update_nas_share(self, uuid_num, replacement_dict, host=None, hostgroup=None):
         if not host and not hostgroup:
             raise Exception('Missing host and hostgroup')
         else:
@@ -81,9 +81,9 @@ class Mounts:
 
             changed = False
             for idx, val in enumerate(self.nfs_info[host_type][name]):
-                if uuid == val['uuid']:
+                if uuid_num == val['uuid']:
                     self.nfs_info[host_type][name][idx].update(replacement_dict)
-                    self.app.logger.info(f"{name}: updating {uuid}")
+                    self.app.logger.info(f"{name}: updating {uuid_num}")
                     changed = True
             if not changed:
                 raise IndexError('no index matching that uuid found')
@@ -96,8 +96,8 @@ class Mounts:
             self.commit(name, 'deleted hostgroup')
         else:
             self.commit(name, 'deleted host')
-    def delete_host_mount(self, name, host_type, uuid):
-       self.nfs_info[host_type][name] = [x for x in self.nfs_info[host_type][name] if x['uuid'] != uuid]
-       self.commit(name, 'deleted mount')
-       return self.nfs_info[host_type][name]
+    def delete_host_mount(self, name, host_type, uuid_num):
+        self.nfs_info[host_type][name] = [x for x in self.nfs_info[host_type][name] if x['uuid'] != uuid_num]
+        self.commit(name, 'deleted mount')
+        return self.nfs_info[host_type][name]
 

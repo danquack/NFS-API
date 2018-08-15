@@ -1,0 +1,10 @@
+language: python
+dist: xenial
+python:
+  - "3.6"
+  - "3.7"
+sudo: true
+install:
+  - pip install -r requirements.txt
+script:
+  - python -m pylint -E *.py --disable=R,C,W,no-member

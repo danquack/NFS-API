@@ -120,7 +120,7 @@ def host_mount_index(host_type, name, uuid):
             return error(e.message)
     elif request.method == 'DELETE':
         try:
-            Mounts(app).delete_host_mount(host_type=host_type, name=name, uuid=uuid)
+            Mounts(app).delete_host_mount(host_type=host_type, name=name, uuid_num=uuid)
             return ok(f'successfully deleted mount {uuid} for {name}')
         except KeyError:
             return not_found()
@@ -135,12 +135,12 @@ def host_mount_index(host_type, name, uuid):
         try:
             if host_type == 'hostgroups':
                 return ok(Mounts(app).update_nas_share(
-                    uuid=uuid,
+                    uuid_num=uuid,
                     replacement_dict=data,
                     hostgroup=name))
             elif host_type == 'hosts':
                 return ok(Mounts(app).update_nas_share(
-                uuid=uuid,
+                uuid_num=uuid,
                 replacement_dict=data,
                 host=name))
         except KeyError:
