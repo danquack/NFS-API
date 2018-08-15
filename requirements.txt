@@ -2,3 +2,4 @@ pyyaml
 flask
 flask_restful
 GitPython
+gunicorn

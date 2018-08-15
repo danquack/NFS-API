@@ -10,15 +10,15 @@ requirements.txt - pip3 install -r requirements.txt - will install the necesary 
 # Install Instructions
 1. Clone Project
 2. Modify git user profile configuration in dockerfile
-2. Run `docker build -t nfs_api:v1 .`
+2. Run `docker build -t nfs_api:latest .`
 3. Run
 ```
 docker run \
--e REPO_URI=<url of git repo (ex. github.com)> \
 -e REPO_SSH_URI=<full ssh git (ex. git@github.com:someuser/NFS-MOUNTS.git)> \
+-e GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" \
 -v /path/to/ssh/on/host:/root/.ssh \
--p 80:5000
-nfs_api:v1
+-p 80:80
+nfs_api:latest
 ```
 4. Interact with the api on your servers ip address on port 80.
 
