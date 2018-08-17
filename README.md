@@ -19,7 +19,7 @@ docker run \
 -e REPO_URI=<full ssh git (ex. git@github.com:someuser/NFS-MOUNTS.git)> \
 -v /path/to/ssh/on/host:/root/.ssh \
 -e GIT_DIRECTORY=/path/to/store/repo
--p 80:5000 \
+-p 5000:5000 \
 nfs_api:latest
 ```
 4. Interact with the api on your servers ip address on port 80.
