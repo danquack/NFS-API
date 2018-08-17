@@ -16,9 +16,10 @@ requirements.txt - pip3 install -r requirements.txt - will install the necesary 
 3. Run
 ```
 docker run \
--e REPO_SSH_URI=<full ssh git (ex. git@github.com:someuser/NFS-MOUNTS.git)> \
+-e REPO_URI=<full ssh git (ex. git@github.com:someuser/NFS-MOUNTS.git)> \
 -v /path/to/ssh/on/host:/root/.ssh \
--p 80:80 \
+-e GIT_DIRECTORY=/path/to/store/repo
+-p 80:5000 \
 nfs_api:latest
 ```
 4. Interact with the api on your servers ip address on port 80.

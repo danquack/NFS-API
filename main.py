@@ -1,11 +1,8 @@
-
 import logging
 from json import dumps, loads
 from flask import Flask, request, Response
 from flask_restful import Resource
-
 from mounts import Mounts, ExistsException
-from os import environ
 
 app = Flask(__name__)
 
@@ -15,16 +12,16 @@ if __name__ != '__main__':
     app.logger.setLevel(gunicorn_logger.level)
 
 def error(message, code=400):
-    app.logger.info(f"{code}: {request.method} - {request.url_rule}")
+    app.logger.info(f"{code}: {request.method} - {request.url}")
     body = {'message': str(message)}
     return Response(dumps(body), status=code, mimetype='application/json')
 
 def ok(body):
-    app.logger.info(f"200: {request.method} - {request.url_rule}")
+    app.logger.info(f"200: {request.method} - {request.url}")
     return Response(dumps(body), status=200, mimetype='application/json')
 
 def not_found():
-    app.logger.info(f"404: {request.method} - {request.url_rule}")
+    app.logger.info(f"404: {request.method} - {request.url}")
     return Response('', status=404, mimetype='application/json')
 
 @app.route('/', methods = ['GET'])
@@ -33,13 +30,13 @@ def health_index():
 
 @app.route('/mounts', methods = ['GET'])
 def mounts_index():
-    return  ok(Mounts(app).nfs_info)
+    return ok(Mounts(app=app).nfs_info)
 
 @app.route('/mounts/<string:host_type>', methods = ['GET', 'POST', 'PUT'])
 def mounts_host_type_index(host_type):
     if request.method == 'GET':
         try:
-            return ok(Mounts(app).nfs_info[host_type])
+            return ok(Mounts(app=app).nfs_info[host_type])
         except:
             return error('invalid type. must be hostgroups or hosts')
     elif request.method == 'POST' or request.method == 'PUT':
@@ -63,7 +60,7 @@ def mounts_host_type_index(host_type):
 
         if host_type == 'hosts':
             try:
-                return ok(Mounts(app).add_nas_share(
+                return ok(Mounts(app=app).add_nas_share(
                     host=data['name'],
                     local_path=data['local_path'],
                     share_path=data['share_path'],
@@ -77,7 +74,7 @@ def mounts_host_type_index(host_type):
                 return error(code=500, message=e)
         elif host_type == 'hostgroups':
             try:
-                return ok(Mounts(app).add_nas_share(
+                return ok(Mounts(app=app).add_nas_share(
                     hostgroup=data['name'],
                     local_path=data['local_path'],
                     share_path=data['share_path'],
@@ -96,14 +93,14 @@ def mounts_host_type_index(host_type):
 def host_index(host_type, name):
     if request.method == 'GET':
         try:
-            return ok(Mounts(app).nfs_info[host_type][name])
+            return ok(Mounts(app=app).nfs_info[host_type][name])
         except KeyError:
             return not_found()
         except Exception as e:
             return error(e.message)
     elif request.method == 'DELETE':
         try:
-            Mounts(app).delete_host_name(host_type=host_type, name=name)
+            Mounts(app=app).delete_host_name(host_type=host_type, name=name)
             return ok(f'successfully deleted {name}')
         except KeyError:
             return not_found()
@@ -113,14 +110,14 @@ def host_index(host_type, name):
 def host_mount_index(host_type, name, uuid):
     if request.method == 'GET':
         try:
-            return ok([x for x in Mounts(app).nfs_info[host_type][name] if x['uuid'] == uuid])
+            return ok([x for x in Mounts(app=app).nfs_info[host_type][name] if x['uuid'] == uuid])
         except KeyError:
             return not_found()
         except Exception as e:
             return error(e.message)
     elif request.method == 'DELETE':
         try:
-            Mounts(app).delete_host_mount(host_type=host_type, name=name, uuid_num=uuid)
+            Mounts(app=app).delete_host_mount(host_type=host_type, name=name, uuid_num=uuid)
             return ok(f'successfully deleted mount {uuid} for {name}')
         except KeyError:
             return not_found()
@@ -134,12 +131,12 @@ def host_mount_index(host_type, name, uuid):
             return error('invalid json body. Please check syntax')
         try:
             if host_type == 'hostgroups':
-                return ok(Mounts(app).update_nas_share(
+                return ok(Mounts(app=app).update_nas_share(
                     uuid_num=uuid,
                     replacement_dict=data,
                     hostgroup=name))
             elif host_type == 'hosts':
-                return ok(Mounts(app).update_nas_share(
+                return ok(Mounts(app=app).update_nas_share(
                 uuid_num=uuid,
                 replacement_dict=data,
                 host=name))
@@ -150,4 +147,3 @@ def host_mount_index(host_type, name, uuid):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
-

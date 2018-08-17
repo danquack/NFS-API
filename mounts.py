@@ -2,28 +2,26 @@ import logging
 import yaml
 import uuid
 from os.path import join
-import git
-
+from os import environ
+from git import Git
 
 class ExistsException(Exception):
     pass
 
 class Mounts:
-    nfs_repo_files = '/config/nfs_mounts/files/'
     def __init__(self, app):
         self.app = app
-        self.git = git.cmd.Git(self.nfs_repo_files)
+        self.git = Git(environ['GIT_DIRECTORY'])
         self.git.pull()
-        file_path = join(self.nfs_repo_files, 'mounts.yml')
-        with open(file_path) as yaml_file:
+        self.nfs_file = join(environ['GIT_DIRECTORY'], 'mounts.yml')
+        with open(self.nfs_file) as yaml_file:
             self.nfs_info = yaml.safe_load(yaml_file.read())
 
     def commit(self, hostname, option):
         self.app.logger.info(f"successfully {option} for {hostname}")
         self.update_current()
-        file_path = join(self.nfs_repo_files, 'mounts.yml')
-        self.git.add(file_path)
         try:
+            self.git.add(self.nfs_file)
             self.git.commit('-m', f"'updated - {option} for {hostname}'")
             self.git.push()
         except Exception as e:
@@ -42,8 +40,7 @@ class Mounts:
         return False
 
     def update_current(self):
-        file_path = join(self.nfs_repo_files, 'test.yml')
-        with open(file_path,'w') as yaml_file:
+        with open(self.nfs_file,'w') as yaml_file:
             to_write = yaml.dump(self.nfs_info, default_flow_style=False)
             yaml_file.write(to_write)
 
@@ -54,7 +51,7 @@ class Mounts:
             host_type = 'hosts' if host else 'hostgroups'
             name = host if host else hostgroup
             if name.lower() not in self.nfs_info[host_type].keys():
-                self.app.logger.info(f"{name}: has no mounts...appnding")
+                self.app.logger.info(f"{name}: has no mounts...appending")
                 self.nfs_info[host_type].update( {name: [] })
 
             mount = {
@@ -100,4 +97,3 @@ class Mounts:
         self.nfs_info[host_type][name] = [x for x in self.nfs_info[host_type][name] if x['uuid'] != uuid_num]
         self.commit(name, 'deleted mount')
         return self.nfs_info[host_type][name]
-
