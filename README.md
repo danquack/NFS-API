@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/danquack/NFS-API.svg?branch=master)](https://travis-ci.org/danquack/NFS-API)
 
-The NFS API was designed to manage a mounts.yml file within nfs_mounts mounts puppet repo. This Python3 application is dockerized and posts to bitbucket using ssh keys embeded into the container.
+The NFS API was designed to manage a mounts.yml file within nfs_mounts mounts puppet repo. This Python3 application is dockerized and posts to git using ssh keys embeded into the container.
 
 # Structure:
 ```
