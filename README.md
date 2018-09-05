@@ -10,7 +10,7 @@ requirements.txt - pip3 install -r requirements.txt - will install the necesary 
 ```
 
 # Pre cursor
-This
+Acting as a container, the main purpose of this project is to managed a git based hiera defintion. Therefore, you must have a NFS Mounts project in git, that utilizes a hiera based defintion.
 
 # Install Instructions
 1. Clone Project
