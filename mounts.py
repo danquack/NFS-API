@@ -13,9 +13,11 @@ class Mounts:
         self.app = app
         self.git = Git(environ['GIT_DIRECTORY'])
         self.git.pull()
-        self.nfs_file = join(environ['GIT_DIRECTORY'], 'mounts.yml')
+        self.nfs_file = join(environ['GIT_DIRECTORY'], 'data/common.yaml')
         with open(self.nfs_file) as yaml_file:
             self.nfs_info = yaml.safe_load(yaml_file.read())
+            if not self.nfs_info:
+                raise Exception('error loading mounts file')
 
     def commit(self, hostname, option):
         self.app.logger.info(f"successfully {option} for {hostname}")
@@ -31,13 +33,17 @@ class Mounts:
                 raise e
 
 
-    def check_exists(self, mount_type, name, mount):
-        for temp_mount in self.nfs_info[mount_type][name]:
-            unmatched_item = set(temp_mount.items()) ^ set(mount.items())
-            ## If the only difference is uuid
-            if len(unmatched_item) is 1 and 'uuid' in dict(unmatched_item).keys():
-                return True
+    def check_exists(self, host_type, name, mount):
+        try:
+            for temp_mount in self.nfs_info[f"nfs_mounts::{host_type}"][name]:
+                unmatched_item = set(temp_mount.items()) ^ set(mount.items())
+                if unmatched_item and dict(unmatched_item) and 'uuid' in dict(unmatched_item).keys():
+                    return True
+        except Exception as e:
+            self.app.logger.warning(e)
+
         return False
+
 
     def update_current(self):
         with open(self.nfs_file,'w') as yaml_file:
@@ -50,10 +56,14 @@ class Mounts:
         else:
             host_type = 'hosts' if host else 'hostgroups'
             name = host if host else hostgroup
-            if name.lower() not in self.nfs_info[host_type].keys():
-                self.app.logger.info(f"{name}: has no mounts...appending")
-                self.nfs_info[host_type].update( {name: [] })
+            if not self.nfs_info[f"nfs_mounts::{host_type}"]:
+                self.nfs_info[f"nfs_mounts::{host_type}"] = {}
 
+            if name.lower() not in self.nfs_info[f"nfs_mounts::{host_type}"].keys():
+                self.app.logger.info(f"{name}: has no mounts...appending")
+                self.nfs_info[f"nfs_mounts::{host_type}"].update( {name: [] })
+
+            self.app.logger.info(self.nfs_info[f"nfs_mounts::{host_type}"].keys())
             mount = {
                     'uuid': str(uuid.uuid4()),
                     'local_path': local_path,
@@ -64,9 +74,9 @@ class Mounts:
             }
             if not self.check_exists(host_type, name, mount):
                 self.app.logger.info(f"{name}: adding {mount}")
-                self.nfs_info[host_type][name].append(mount)
+                self.nfs_info[f"nfs_mounts::{host_type}"][name].append(mount)
                 self.commit(name, 'add')
-                return self.nfs_info[host_type][name]
+                return self.nfs_info[f"nfs_mounts::{host_type}"][name]
             else:
                 raise ExistsException('mount point already exists')
     def update_nas_share(self, uuid_num, replacement_dict, host=None, hostgroup=None):
@@ -77,23 +87,23 @@ class Mounts:
             name = host if host else hostgroup
 
             changed = False
-            for idx, val in enumerate(self.nfs_info[host_type][name]):
+            for idx, val in enumerate(self.nfs_info[f"nfs_mounts::{host_type}"][name]):
                 if uuid_num == val['uuid']:
-                    self.nfs_info[host_type][name][idx].update(replacement_dict)
+                    self.nfs_info[f"nfs_mounts::{host_type}"][name][idx].update(replacement_dict)
                     self.app.logger.info(f"{name}: updating {uuid_num}")
                     changed = True
             if not changed:
                 raise IndexError('no index matching that uuid found')
             self.commit(name, 'added')
-            return self.nfs_info[host_type][name]
+            return self.nfs_info[f"nfs_mounts::{host_type}"][name]
 
     def delete_host_name(self, name, host_type):
-        del self.nfs_info[host_type][name]
+        del self.nfs_info[f"nfs_mounts::{host_type}"][name]
         if host_type == 'hostgroups':
             self.commit(name, 'deleted hostgroup')
         else:
             self.commit(name, 'deleted host')
     def delete_host_mount(self, name, host_type, uuid_num):
-        self.nfs_info[host_type][name] = [x for x in self.nfs_info[host_type][name] if x['uuid'] != uuid_num]
+        self.nfs_info[f"nfs_mounts::{host_type}"][name] = [x for x in self.nfs_info[f"nfs_mounts::{host_type}"][name] if x['uuid'] != uuid_num]
         self.commit(name, 'deleted mount')
-        return self.nfs_info[host_type][name]
+        return self.nfs_info[f"nfs_mounts::{host_type}"][name]

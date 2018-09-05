@@ -1,8 +1,12 @@
 import logging
+
 from json import dumps, loads
 from flask import Flask, request, Response
 from flask_restful import Resource
+from urllib.parse import quote
+from git import Git, Repo
 from mounts import Mounts, ExistsException
+
 
 app = Flask(__name__)
 
@@ -36,7 +40,7 @@ def mounts_index():
 def mounts_host_type_index(host_type):
     if request.method == 'GET':
         try:
-            return ok(Mounts(app=app).nfs_info[host_type])
+            return ok(Mounts(app=app).nfs_info[f"nfs_mounts::{host_type}"])
         except:
             return error('invalid type. must be hostgroups or hosts')
     elif request.method == 'POST' or request.method == 'PUT':
@@ -46,7 +50,7 @@ def mounts_host_type_index(host_type):
         except:
             return error('invalid json body. Please check syntax')
         if 'options' not in data.keys():
-            data['options'] = 'rw,suid,soft,rsize=16384,wsize=16384,vers=3,tcp'
+            data['options'] = 'rw,bg,suid,soft,rsize=16384,wsize=16384,vers=3,tcp'
         if 'owner' not in data.keys():
             data['owner'] = 'root'
         if 'group' not in data.keys():
@@ -93,7 +97,7 @@ def mounts_host_type_index(host_type):
 def host_index(host_type, name):
     if request.method == 'GET':
         try:
-            return ok(Mounts(app=app).nfs_info[host_type][name])
+            return ok(Mounts(app=app).nfs_info[f"nfs_mounts::{host_type}"][name])
         except KeyError:
             return not_found()
         except Exception as e:
@@ -110,7 +114,7 @@ def host_index(host_type, name):
 def host_mount_index(host_type, name, uuid):
     if request.method == 'GET':
         try:
-            return ok([x for x in Mounts(app=app).nfs_info[host_type][name] if x['uuid'] == uuid])
+            return ok([x for x in Mounts(app=app).nfs_info[f"nfs_mounts::{host_type}"][name] if x['uuid'] == uuid])
         except KeyError:
             return not_found()
         except Exception as e:

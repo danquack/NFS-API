@@ -3,8 +3,6 @@ USER root
 RUN  yum install -y git
 
 ENV GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
-RUN git config --global user.name "NFS API"
-RUN git config --global user.email "nfsapi@yourdomain.com"
 
 # Add The App
 RUN mkdir /app

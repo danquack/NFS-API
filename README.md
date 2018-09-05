@@ -9,6 +9,9 @@ mounts.py - the behind the scenes worker to read and update the mounts file
 requirements.txt - pip3 install -r requirements.txt - will install the necesary packages needed to run the app
 ```
 
+# Pre cursor
+This
+
 # Install Instructions
 1. Clone Project
 2. Modify git user profile configuration in dockerfile
@@ -80,9 +83,9 @@ nfs_api:latest
 </table>
 
 ### YAML File:
-The structure of the yaml defines an array of mount objects, located in the external REPO_SSH_URI (NFS-Mounts under a files directory), is as follows
+The structure of the hiera based yaml that defines an array of mount objects, located in the external REPO_SSH_URI (NFS-Mounts under a data directory), is as follows
 ```
-Hosts:
+nfs_mounts::Hosts:
    Hostname.company.com:
     -	uuid
         share_path
@@ -92,7 +95,7 @@ Hosts:
         group
    Hostname2.company.com:
     -	...
-Hostgroups:
+nfs_mounts::Hostgroups:
     Group1:
     -	uuid
         share_path
